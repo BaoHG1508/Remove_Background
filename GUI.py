@@ -3,13 +3,37 @@ from PIL import ImageTk, Image
 from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
 from functools import partial
+import numpy as np
 import cv2
 
 img = []
+back_ground = []
+image = []
+
+def ImportBackground():
+    #import back_ground
+    global back_ground
+    filetypes = (
+        ('jpg files', '*.jpg'),
+        ("png files", "*.png"),
+    )
+
+    filename = fd.askopenfilename(
+        title='Open a file',
+        initialdir='/',
+        filetypes=filetypes)
+    showinfo(
+        title='Import Background thành công',
+        message=filename
+    )
+    filename = filename.replace("/","\\")
+    back_ground = cv2.imread(filename)
+
 
 def ImportImage(canvas):
     #import image
     global img
+    global image
     filetypes = (
         ('jpg files', '*.jpg'),
         ("png files", "*.png"),
@@ -25,7 +49,8 @@ def ImportImage(canvas):
     )
     #Resize anh to lai cho fit vao 700 x 450 canvas
     filename = filename.replace("/","\\")
-    img = ImageTk.PhotoImage(Image.open(filename))      
+    images = cv2.imread(filename)
+    img = ImageTk.PhotoImage(image=Image.fromarray(images))      
     canvas.create_image(50,50, anchor=NW, image=img) 
 
 def CreateForm():
@@ -47,7 +72,7 @@ def CreateForm():
     Change_background_button.place(x=400,y=500)
     #Configure Import Background
     import_background_button = Button(window,text="Import Background")
-    import_background_button.config(command=ImportImage)
+    import_background_button.config(command=ImportBackground)
     import_background_button.config(height = 2,width=15)
     import_background_button.place(x=700,y=500)
 
