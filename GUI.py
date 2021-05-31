@@ -31,9 +31,9 @@ def ImportBackground():
     filename = filename.replace("/","\\")
     back_ground = cv2.imread(filename)
     back_ground = cv2.resize(back_ground,(700,450))
+    back_ground = cv2.cvtColor(back_ground,cv2.COLOR_BGR2RGB)
 
-
-def ImportImage(canvas):
+def ImportImage(canvas):    
     #import image
     global img
     global images
@@ -63,6 +63,7 @@ def ImportImage(canvas):
     filename = filename.replace("/","\\")
     images = cv2.imread(filename)
     images = cv2.resize(images, (700, 450))
+    images = cv2.cvtColor(images,cv2.COLOR_BGR2RGB)
     img = ImageTk.PhotoImage(image=Image.fromarray(images))      
     canvas.create_image(50,50, anchor=NW, image=img) 
 
