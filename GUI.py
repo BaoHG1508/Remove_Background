@@ -11,6 +11,8 @@ def CreateForm():
     window.resizable(0, 0)
     #Create image box
 
+    #Code Cai nay```````````````````````````````
+    
     canvas = Canvas(window, width = 700, height = 450)      
     canvas.pack()
     img = ImageTk.PhotoImage(Image.open("CS231/img/green_cat.jpg"))  
