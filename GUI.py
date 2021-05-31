@@ -2,13 +2,8 @@ from tkinter import *
 from PIL import ImageTk, Image
 from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
-from functools import partial
 import numpy as np
 import cv2
-
-img = []
-back_ground = []
-image = []
 
 def ImportBackground():
     #import back_ground
@@ -22,36 +17,82 @@ def ImportBackground():
         title='Open a file',
         initialdir='/',
         filetypes=filetypes)
-    showinfo(
-        title='Import Background thành công',
-        message=filename
-    )
+    if filename != "":
+        showinfo(
+            title='Import background',
+            message="Import background succeed"
+        )
+    else:
+        showinfo(
+            title='Error!',
+            message="Please import again!"
+        )
+
     filename = filename.replace("/","\\")
     back_ground = cv2.imread(filename)
+    back_ground = cv2.resize(back_ground,(700,450))
 
 
 def ImportImage(canvas):
     #import image
     global img
-    global image
+    global images
     filetypes = (
         ('jpg files', '*.jpg'),
         ("png files", "*.png"),
     )
-
+    
     filename = fd.askopenfilename(
         title='Open a file',
         initialdir='/',
         filetypes=filetypes)
-    showinfo(
-        title='Selected File',
-        message=filename
-    )
-    #Resize anh to lai cho fit vao 700 x 450 canvas
+
+    if filename != "":
+        showinfo(
+            title='Import image',
+            message="Import image succeed"
+        )
+
+    else:
+        showinfo(
+            title='Error!',
+            message="Please import again!"
+        )
+        return
+
     filename = filename.replace("/","\\")
     images = cv2.imread(filename)
     images = cv2.resize(images, (700, 450))
     img = ImageTk.PhotoImage(image=Image.fromarray(images))      
+    canvas.create_image(50,50, anchor=NW, image=img) 
+
+def Change_Background(canvas):
+    global images
+    global back_ground  
+    global fg
+    global img
+
+    if images == []:
+        (showinfo(
+        title='Error',
+        message="Please import your image"))
+        return
+
+    if back_ground == []:
+        (showinfo(
+        title='Error',
+        message="Please import your background"))
+        return
+
+    #Thay background
+    hsv = cv2.cvtColor(images,cv2.COLOR_BGR2HSV)
+    lower_green = np.array([49,101,0])
+    green = np.array([179,255,255])
+    mask = cv2.inRange(hsv,lower_green,green)
+    mask_inv = cv2.bitwise_not(mask)
+    fg = cv2.bitwise_and(images,images, mask = mask_inv)
+    fg = np.where(fg == 0,back_ground,fg)
+    img = ImageTk.PhotoImage(image=Image.fromarray(fg))
     canvas.create_image(50,50, anchor=NW, image=img) 
 
 def CreateForm():
@@ -68,7 +109,7 @@ def CreateForm():
     import_button.place(x=100,y=500)
     #Configure Change Background button
     Change_background_button = Button(window,text="Change Background")
-    Change_background_button.config(command=lambda: ImportImage(window))
+    Change_background_button.config(command=lambda: Change_Background(canvas))
     Change_background_button.config(height = 2,width=15)
     Change_background_button.place(x=400,y=500)
     #Configure Import Background
@@ -80,5 +121,10 @@ def CreateForm():
     window.mainloop()
 
     
+
+img = []
+back_ground = []
+images = []
+fg = []
 
 CreateForm()
