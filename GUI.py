@@ -11,7 +11,7 @@ def CreateForm():
     window.resizable(0, 0)
     #Create image box
 
-    #Code Cai nay```````````````````````````````
+    #Code Cai nay` de~ fit anh~ vao window 700x450
     
     canvas = Canvas(window, width = 700, height = 450)      
     canvas.pack()
@@ -24,6 +24,7 @@ def CreateForm():
     import_button.config(command=ImportImage)
     import_button.config(height = 2,width=15)
     import_button.place(x=100,y=500)
+
     #Configure Change Background button
     
     Change_background_button = Button(window,text="Change Background")
