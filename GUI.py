@@ -14,7 +14,6 @@ def CreateForm():
     canvas = Canvas(window, width = 700, height = 450)      
     canvas.pack()
     img = ImageTk.PhotoImage(Image.open("CS231/img/green_cat.jpg"))  
-    img = image.resize((250, 250), Image.ANTIALIAS) 
     canvas.create_image(20,20, anchor=NW, image=img) 
 
     #Configure Import button
