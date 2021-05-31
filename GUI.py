@@ -50,6 +50,7 @@ def ImportImage(canvas):
     #Resize anh to lai cho fit vao 700 x 450 canvas
     filename = filename.replace("/","\\")
     images = cv2.imread(filename)
+    images = cv2.resize(images, (700, 450))
     img = ImageTk.PhotoImage(image=Image.fromarray(images))      
     canvas.create_image(50,50, anchor=NW, image=img) 
 
