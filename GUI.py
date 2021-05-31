@@ -104,17 +104,17 @@ def CreateForm():
     canvas = Canvas(window, width = 700, height = 450)      
     canvas.pack()
     #Configure Import button
-    import_button = Button(window,text="Import image")
+    import_button = Button(window,text="Import Picture",bg='black', fg='white')
     import_button.config(command= lambda: ImportImage(canvas))
     import_button.config(height = 2,width=15)
     import_button.place(x=100,y=500)
     #Configure Change Background button
-    Change_background_button = Button(window,text="Change Background")
+    Change_background_button = Button(window,text="Change Background",bg='black', fg='white')
     Change_background_button.config(command=lambda: Change_Background(canvas))
     Change_background_button.config(height = 2,width=15)
     Change_background_button.place(x=400,y=500)
     #Configure Import Background
-    import_background_button = Button(window,text="Import Background")
+    import_background_button = Button(window,text="Import Background",bg='black', fg='white')
     import_background_button.config(command=ImportBackground)
     import_background_button.config(height = 2,width=15)
     import_background_button.place(x=700,y=500)
