@@ -86,12 +86,13 @@ def Change_Background(canvas):
         return
 
     #Thay background
-    hsv = cv2.cvtColor(images,cv2.COLOR_RGB2HSV)
-    lower_green = np.array([54,123,40])
-    green = np.array([66,255,255])
+    hsv = cv2.cvtColor(images,cv2.COLOR_BGR2HSV)
+    lower_green = np.array([42, 180, 39])
+    green = np.array([81,255,255])
     mask = cv2.inRange(hsv,lower_green,green)
     mask = cv2.dilate(mask, None)
     mask_inv = cv2.bitwise_not(mask)
+    mask_inv = cv2.dilate(mask_inv,None)
     fg = cv2.bitwise_and(images,images, mask = mask_inv)
     fg = np.where(fg == 0,back_ground,fg)
     img = ImageTk.PhotoImage(image=Image.fromarray(fg))
