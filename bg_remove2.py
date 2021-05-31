@@ -15,8 +15,8 @@ if back_ground.shape != cap.shape:
 
 hsv = cv2.cvtColor(cap,cv2.COLOR_BGR2HSV)
 
-lower_green = np.array([49,101,0])
-green = np.array([179,255,255])
+lower_green = np.array([33,123,0])
+green = np.array([141,255,255])
 
 mask = cv2.inRange(hsv,lower_green,green)
 mask_inv = cv2.bitwise_not(mask)
