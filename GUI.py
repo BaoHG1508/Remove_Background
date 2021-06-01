@@ -40,6 +40,7 @@ def ImportImage(canvas):
     filetypes = (
         ('jpg files', '*.jpg'),
         ("png files", "*.png"),
+        ("mp4", "*.mp4")
     )
     
     filename = fd.askopenfilename(
@@ -88,7 +89,7 @@ def Change_Background(canvas):
     #Thay background
     hsv = cv2.cvtColor(images,cv2.COLOR_BGR2HSV)
     lower_green = np.array([42, 180, 39])
-    green = np.array([81,255,255])
+    green = np.array([77,255,255])
     mask = cv2.inRange(hsv,lower_green,green)
     mask = cv2.dilate(mask, None)
     mask_inv = cv2.bitwise_not(mask)
@@ -130,5 +131,6 @@ img = []
 back_ground = []
 images = []
 fg = []
+frame = []
 
 CreateForm()
