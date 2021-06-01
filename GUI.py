@@ -98,6 +98,45 @@ def Change_Background(canvas):
     img = ImageTk.PhotoImage(image=Image.fromarray(fg))
     canvas.create_image(50,50, anchor=  NW, image=img) 
 
+def ImportVideo(canvas, window):
+    global video
+    filetypes = (
+        ('mp4 files', '*.mp4'),
+    )
+    filename = fd.askopenfilename(
+        title='Open a file',
+        initialdir='/',
+        filetypes=filetypes)
+    if filename != "":
+        showinfo(
+            title='Import video',
+            message="Import video succeed"
+        )
+    else:
+        showinfo(
+            title='Error!',
+            message="Please import again!"
+        )
+        return
+    filename = filename.replace("/","\\")
+    video = cv2.VideoCapture(filename)
+    while True:
+        ret, frame = video.read()
+        flag = False
+        if ret == True:
+            b = cv2.resize(frame,(700,450))
+            b = cv2.cvtColor(b, cv2.COLOR_BGR2RGB)
+            img = ImageTk.PhotoImage(image=Image.fromarray(b))
+            if flag == False:
+                canvas.create_image(50, 50, anchor = NW, image = img) #This f*cking sh*t :))
+                flag = True
+            else:
+                canvas.configure(image = img)
+                canvas.pack()
+            #cv2.imshow("Frame", b)
+            cv2.waitKey(10)
+        else:
+            break
 
 def CreateForm():
 
@@ -115,10 +154,15 @@ def CreateForm():
     Change_background_button = Button(window,text="Change Background",bg='black', fg='white')
     Change_background_button.config(command=lambda: Change_Background(canvas))
     Change_background_button.config(height = 2,width=15)
-    Change_background_button.place(x=400,y=500)
+    Change_background_button.place(x=300,y=500)
     #Configure Import Background
     import_background_button = Button(window,text="Import Background",bg='black', fg='white')
     import_background_button.config(command=ImportBackground)
+    import_background_button.config(height = 2,width=15)
+    import_background_button.place(x=500,y=500)
+    #Configure Import Video
+    import_background_button = Button(window,text="Import Video",bg='black', fg='white')
+    import_background_button.config(command=lambda: ImportVideo(canvas, window))
     import_background_button.config(height = 2,width=15)
     import_background_button.place(x=700,y=500)
 
@@ -130,5 +174,6 @@ img = []
 back_ground = []
 images = []
 fg = []
+video = []
 
 CreateForm()
