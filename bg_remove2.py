@@ -24,7 +24,6 @@ while True:
     mask = cv2.inRange(hsv,lower_green,green)
     mask_inv = cv2.bitwise_not(mask)
 
-    bg = cv2.bitwise_and(frame,back_ground, mask = mask)
     fg = cv2.bitwise_and(frame,frame, mask = mask_inv)
 
     fg = np.where(fg == 0,back_ground,fg)

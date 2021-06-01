@@ -1,9 +1,27 @@
+import tkinter as tk, threading
 from tkinter import *
 from PIL import ImageTk, Image
 from tkinter import filedialog as fd
 from tkinter.messagebox import showinfo
+from imageio.core.util import image_as_uint
 import numpy as np
 import cv2
+import imageio
+
+class StoppableThread(threading.Thread):
+    """Thread class with a stop() method. The thread itself has to check
+    regularly for the stopped() condition."""
+
+    def __init__(self,  *args, **kwargs):
+        super(StoppableThread, self).__init__(*args, **kwargs)
+        self._stop_event = threading.Event()
+
+    def stop(self):
+        self._stop_event.set()
+
+    def stopped(self):
+        return self._stop_event.is_set()
+
 
 def ImportBackground():
     #import back_ground
@@ -33,10 +51,12 @@ def ImportBackground():
     back_ground = cv2.resize(back_ground,(700,450))
     back_ground = cv2.cvtColor(back_ground,cv2.COLOR_BGR2RGB)
 
-def ImportImage(canvas):    
+def ImportImage(label,import_video):    
     #import image
     global img
     global images
+    global video
+    
     filetypes = (
         ('jpg files', '*.jpg'),
         ("png files", "*.png"),
@@ -53,7 +73,8 @@ def ImportImage(canvas):
             title='Import image',
             message="Import image succeed"
         )
-
+        import_video["state"] = "disabled"
+        video = []
     else:
         showinfo(
             title='Error!',
@@ -66,15 +87,17 @@ def ImportImage(canvas):
     images = cv2.resize(images, (700, 450))
     images = cv2.cvtColor(images,cv2.COLOR_BGR2RGB)
     img = ImageTk.PhotoImage(image=Image.fromarray(images))      
-    canvas.create_image(50,50, anchor=NW, image=img) 
+    label.config(image=img)
+    label.image = img
 
-def Change_Background(canvas):
+def Change_Background(label,import_button,import_video):
     global images
     global back_ground  
     global fg
     global img
-
-    if images == []:
+    global video
+    global thread
+    if images == [] and video == []:
         (showinfo(
         title='Error',
         message="Please import your image"))
@@ -86,43 +109,109 @@ def Change_Background(canvas):
         message="Please import your background"))
         return
 
+    import_button['state'] = "normal"
+    import_video['state'] = "normal"
     #Thay background
-    hsv = cv2.cvtColor(images,cv2.COLOR_BGR2HSV)
-    lower_green = np.array([42, 180, 39])
-    green = np.array([77,255,255])
-    mask = cv2.inRange(hsv,lower_green,green)
-    mask = cv2.dilate(mask, None)
-    mask_inv = cv2.bitwise_not(mask)
-    mask_inv = cv2.dilate(mask_inv,None)
-    fg = cv2.bitwise_and(images,images, mask = mask_inv)
-    fg = np.where(fg == 0,back_ground,fg)
-    img = ImageTk.PhotoImage(image=Image.fromarray(fg))
-    canvas.create_image(50,50, anchor=  NW, image=img) 
+    if images != []:
+        hsv = cv2.cvtColor(images,cv2.COLOR_BGR2HSV)
+        lower_green = np.array([42, 180, 39])
+        green = np.array([77,255,255])
+        mask = cv2.inRange(hsv,lower_green,green)
+        mask = cv2.dilate(mask, None)
+        mask_inv = cv2.bitwise_not(mask)
+        mask_inv = cv2.dilate(mask_inv,None)
+        fg = cv2.bitwise_and(images,images, mask = mask_inv)
+        fg = np.where(fg == 0,back_ground,fg)
+        img = ImageTk.PhotoImage(image=Image.fromarray(fg))
+        label.config(image=img)
+        label.image = img
+    elif video != []:
+        thread = StoppableThread(target=stream_bg_changed, args=(label,))
+        thread.daemon = 1
+        thread.start()
 
+def stream_bg_changed(label):
+    global back_ground
+    back_ground = cv2.resize(back_ground,(700,450))
+    for image in video.iter_data():
+        hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
+        lower_green = np.array([42, 180, 39])
+        green = np.array([77,255,255])
+        mask = cv2.inRange(hsv,lower_green,green)
+        mask_inv = cv2.bitwise_not(mask)
+        mask_inv = cv2.dilate(mask_inv,None)
+        fg = cv2.bitwise_and(image,image, mask = mask_inv)
+        fg = cv2.resize(fg,(700,450))
+        fg = np.where(fg == 0,back_ground,fg)
+        frame_image = ImageTk.PhotoImage(Image.fromarray(fg))
+        label.config(image=frame_image)
+        label.image = frame_image    
 
+def ImportVideo(my_label,import_button):
+    global video
+    global thread
+    global img
+    global images
+    filetypes = (
+        ('mp4 files', '*.mp4'),
+    )
+    filename = fd.askopenfilename(
+        title='Open a file',
+        initialdir='/',
+        filetypes=filetypes)
+    if filename != "":
+        showinfo(
+            title='Import video',
+            message="Import video succeed"
+        )
+        import_button['state'] = "disable"
+        images = []
+        video = []
+    else:
+        showinfo(
+            title='Error!',
+            message="Please import again!"
+        )
+        return
+    filename = filename.replace("/","\\")
+    video = imageio.get_reader(filename)
+    for imagez in video.iter_data():
+        imagez = np.array(imagez,dtype=np.uint8)
+        imagez = cv2.resize(imagez, (700, 450))
+        img = ImageTk.PhotoImage(image=Image.fromarray(imagez))      
+        my_label.config(image=img)
+        my_label.image = img
+        return
+     
 def CreateForm():
 
     window = Tk()
     window.geometry("918x610")
     window.resizable(0, 0)
-    canvas = Canvas(window, width = 700, height = 450)      
-    canvas.pack()
+    my_label = tk.Label(window, width = 700, height = 450)
+    my_label.pack()
+    
     #Configure Import button
     import_button = Button(window,text="Import Picture",bg='black', fg='white')
-    import_button.config(command= lambda: ImportImage(canvas))
+    import_button.config(command= lambda: ImportImage(my_label,import_video))
     import_button.config(height = 2,width=15)
     import_button.place(x=100,y=500)
     #Configure Change Background button
     Change_background_button = Button(window,text="Change Background",bg='black', fg='white')
-    Change_background_button.config(command=lambda: Change_Background(canvas))
+    Change_background_button.config(command=lambda: Change_Background(my_label,import_button,import_video))
     Change_background_button.config(height = 2,width=15)
-    Change_background_button.place(x=400,y=500)
+    Change_background_button.place(x=300,y=500)
     #Configure Import Background
     import_background_button = Button(window,text="Import Background",bg='black', fg='white')
     import_background_button.config(command=ImportBackground)
     import_background_button.config(height = 2,width=15)
-    import_background_button.place(x=700,y=500)
-
+    import_background_button.place(x=500,y=500)
+    #Configure Import Video
+    import_video = Button(window,text="Import Video",bg='black', fg='white')
+    import_video.config(command=lambda: ImportVideo(my_label,import_button))
+    import_video.config(height = 2,width=15)
+    import_video.place(x=700,y=500)
+    #Play video button
     window.mainloop()
 
     
@@ -131,6 +220,7 @@ img = []
 back_ground = []
 images = []
 fg = []
-frame = []
+video = []
+thread = []
 
 CreateForm()
