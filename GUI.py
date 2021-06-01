@@ -103,10 +103,8 @@ def Change_Background(label,import_button,import_video):
         green = np.array([77,255,255])
         mask = cv2.inRange(hsv,lower_green,green)
         mask = cv2.dilate(mask, None)
-        mask_inv = cv2.bitwise_not(mask)
-        mask_inv = cv2.dilate(mask_inv,None)
-        fg = cv2.bitwise_and(images,images, mask = mask_inv)
-        fg = np.where(fg == 0,back_ground,fg)
+        fg = cv2.bitwise_and(back_ground,back_ground, mask = mask)
+        fg = np.where(fg == 0,images,back_ground)
         img = ImageTk.PhotoImage(image=Image.fromarray(fg))
         label.config(image=img)
         label.image = img
@@ -118,16 +116,16 @@ def Change_Background(label,import_button,import_video):
 def stream_bg_changed(label):
     global back_ground
     back_ground = cv2.resize(back_ground,(700,450))
+    back_ground = cv2.cvtColor(back_ground,cv2.COLOR_BGR2RGB)
+    
     for image in video.iter_data():
+        image = cv2.resize(image,(700,450))
         hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
         lower_green = np.array([42, 180, 39])
         green = np.array([77,255,255])
         mask = cv2.inRange(hsv,lower_green,green)
-        mask_inv = cv2.bitwise_not(mask)
-        mask_inv = cv2.dilate(mask_inv,None)
-        fg = cv2.bitwise_and(image,image, mask = mask_inv)
-        fg = cv2.resize(fg,(700,450))
-        fg = np.where(fg == 0,back_ground,fg)
+        fg = cv2.bitwise_and(back_ground,back_ground, mask = mask)
+        fg = np.where(fg == 0,image,back_ground)
         frame_image = ImageTk.PhotoImage(Image.fromarray(fg))
         label.config(image=frame_image)
         label.image = frame_image    
