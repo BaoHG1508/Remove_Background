@@ -30,6 +30,7 @@ def ImportBackground():
             title='Error!',
             message="Please import again!"
         )
+        return
 
     filename = filename.replace("/","\\")
     back_ground = cv2.imread(filename)
@@ -116,7 +117,6 @@ def Change_Background(label,import_button,import_video):
 def stream_bg_changed(label):
     global back_ground
     back_ground = cv2.resize(back_ground,(700,450))
-    back_ground = cv2.cvtColor(back_ground,cv2.COLOR_BGR2RGB)
     
     for image in video.iter_data():
         image = cv2.resize(image,(700,450))
@@ -129,7 +129,8 @@ def stream_bg_changed(label):
         frame_image = ImageTk.PhotoImage(Image.fromarray(fg))
         label.config(image=frame_image)
         label.image = frame_image    
-
+    stream_bg_changed(label)
+    
 def ImportVideo(my_label,import_button):
     global video
     global thread
