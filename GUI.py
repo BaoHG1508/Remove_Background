@@ -66,6 +66,7 @@ def ImportImage(label,import_video):
             title='Error!',
             message="Please import again!"
         )
+        import_video['state'] = "normal"
         return
 
     filename = filename.replace("/","\\")
@@ -103,10 +104,12 @@ def Change_Background(label,import_button,import_video):
         lower_green = np.array([42, 180, 39])
         green = np.array([77,255,255])
         mask = cv2.inRange(hsv,lower_green,green)
-        mask = cv2.dilate(mask, None)
-        fg = cv2.bitwise_and(back_ground,back_ground, mask = mask)
-        fg = np.where(fg == 0,images,back_ground)
-        img = ImageTk.PhotoImage(image=Image.fromarray(fg))
+        mask_inv = cv2.bitwise_not(mask)
+        mask = cv2.cvtColor(mask,cv2.COLOR_GRAY2RGB)
+        mask = np.where(mask == 0,mask,back_ground)
+        mask_inv = cv2.cvtColor(mask_inv,cv2.COLOR_GRAY2RGB)
+        mask_inv = np.where(mask_inv == 0,mask_inv,images)
+        img = ImageTk.PhotoImage(image=Image.fromarray(mask_inv+mask))
         label.config(image=img)
         label.image = img
     elif video != []:
@@ -124,9 +127,12 @@ def stream_bg_changed(label):
         lower_green = np.array([42, 180, 39])
         green = np.array([77,255,255])
         mask = cv2.inRange(hsv,lower_green,green)
-        fg = cv2.bitwise_and(back_ground,back_ground, mask = mask)
-        fg = np.where(fg == 0,image,back_ground)
-        frame_image = ImageTk.PhotoImage(Image.fromarray(fg))
+        mask_inv = cv2.bitwise_not(mask)
+        mask = cv2.cvtColor(mask,cv2.COLOR_GRAY2RGB)
+        mask = np.where(mask == 0,mask,back_ground)
+        mask_inv = cv2.cvtColor(mask_inv,cv2.COLOR_GRAY2RGB)
+        mask_inv = np.where(mask_inv == 0,mask_inv,image)
+        frame_image = ImageTk.PhotoImage(Image.fromarray(mask_inv+mask))
         label.config(image=frame_image)
         label.image = frame_image    
     stream_bg_changed(label)
