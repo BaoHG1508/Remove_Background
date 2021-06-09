@@ -59,14 +59,12 @@ def ImportImage(label,import_video):
             title='Import image',
             message="Import image succeed"
         )
-        import_video["state"] = "disabled"
         video = []
     else:
         showinfo(
             title='Error!',
             message="Please import again!"
         )
-        import_video['state'] = "normal"
         return
 
     filename = filename.replace("/","\\")
@@ -77,27 +75,34 @@ def ImportImage(label,import_video):
     label.config(image=img)
     label.image = img
 
-def Change_Background(label,import_button,import_video):
+def Change_Background(label,import_button,import_video,window):
     global images
     global back_ground  
     global fg
     global img
     global video
     global thread
+    global stop
+    stop = False
     if images == [] and video == []:
         (showinfo(
         title='Error',
         message="Please import your image"))
         return
 
+    if images == [] and video != "":
+        #Stop video
+        Stop_button = Button(window,text="Stop",bg='black', fg='white')
+        Stop_button.config(height = 2,width=15)
+        Stop_button.config(command=lambda: StopVideo(import_video))
+        Stop_button.place(x=400,y=400)
+        import_video['state'] = "disable"
     if back_ground == []:
         (showinfo(
         title='Error',
         message="Please import your background"))
         return
 
-    import_button['state'] = "normal"
-    import_video['state'] = "normal"
     #Thay background
     if images != []:
         hsv = cv2.cvtColor(images,cv2.COLOR_BGR2HSV)
@@ -113,14 +118,19 @@ def Change_Background(label,import_button,import_video):
         label.config(image=img)
         label.image = img
     elif video != []:
-        thread = threading.Thread(target=stream_bg_changed, args=(label,))
+        thread = threading.Thread(target=stream_bg_changed, args=(label,Stop_button,))
         thread.daemon = 1
         thread.start()
 
-def stream_bg_changed(label):
+def StopVideo(import_video):
+    global stop
+    import_video['state'] = "normal"
+    stop = True
+
+
+def stream_bg_changed(label,StopButton):
     global back_ground
     back_ground = cv2.resize(back_ground,(700,450))
-    
     for image in video.iter_data():
         image = cv2.resize(image,(700,450))
         hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
@@ -134,8 +144,12 @@ def stream_bg_changed(label):
         mask_inv = np.where(mask_inv == 0,mask_inv,image)
         frame_image = ImageTk.PhotoImage(Image.fromarray(mask_inv+mask))
         label.config(image=frame_image)
-        label.image = frame_image    
-    stream_bg_changed(label)
+        label.image = frame_image
+        if stop == True:
+            break
+    if stop == False:
+        stream_bg_changed(label)
+    StopButton.destroy()
     
 def ImportVideo(my_label,import_button):
     global video
@@ -154,15 +168,14 @@ def ImportVideo(my_label,import_button):
             title='Import video',
             message="Import video succeed"
         )
-        import_button['state'] = "disable"
         images = []
-        video = []
     else:
         showinfo(
             title='Error!',
             message="Please import again!"
         )
         return
+    
     filename = filename.replace("/","\\")
     video = imageio.get_reader(filename)
     for imagez in video.iter_data():
@@ -188,7 +201,7 @@ def CreateForm():
     import_button.place(x=100,y=500)
     #Configure Change Background button
     Change_background_button = Button(window,text="Change Background",bg='black', fg='white')
-    Change_background_button.config(command=lambda: Change_Background(my_label,import_button,import_video))
+    Change_background_button.config(command=lambda: Change_Background(my_label,import_button,import_video,window))
     Change_background_button.config(height = 2,width=15)
     Change_background_button.place(x=300,y=500)
     #Configure Import Background
@@ -201,6 +214,7 @@ def CreateForm():
     import_video.config(command=lambda: ImportVideo(my_label,import_button))
     import_video.config(height = 2,width=15)
     import_video.place(x=700,y=500)
+    
     #Play video button
     window.mainloop()
 
@@ -212,5 +226,5 @@ images = []
 fg = []
 video = []
 thread = []
-
+stop = False
 CreateForm()
