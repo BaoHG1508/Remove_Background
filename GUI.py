@@ -106,8 +106,8 @@ def Change_Background(label,import_button,import_video,window):
     #Thay background
     if images != []:
         hsv = cv2.cvtColor(images,cv2.COLOR_BGR2HSV)
-        lower_green = np.array([42, 180, 39])
-        green = np.array([77,255,255])
+        lower_green = np.array([38, 40, 40])
+        green = np.array([70,255,255])
         mask = cv2.inRange(hsv,lower_green,green)
         mask_inv = cv2.bitwise_not(mask)
         mask = cv2.cvtColor(mask,cv2.COLOR_GRAY2RGB)
@@ -134,8 +134,8 @@ def stream_bg_changed(label,StopButton):
     for image in video.iter_data():
         image = cv2.resize(image,(700,450))
         hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
-        lower_green = np.array([42, 180, 39])
-        green = np.array([77,255,255])
+        lower_green = np.array([38, 40, 40])
+        green = np.array([70,255,255])
         mask = cv2.inRange(hsv,lower_green,green)
         mask_inv = cv2.bitwise_not(mask)
         mask = cv2.cvtColor(mask,cv2.COLOR_GRAY2RGB)
@@ -148,7 +148,7 @@ def stream_bg_changed(label,StopButton):
         if stop == True:
             break
     if stop == False:
-        stream_bg_changed(label)
+        stream_bg_changed(label,StopButton)
     StopButton.destroy()
     
 def ImportVideo(my_label,import_button):
@@ -158,6 +158,7 @@ def ImportVideo(my_label,import_button):
     global images
     filetypes = (
         ('mp4 files', '*.mp4'),
+        ('All files', '*.*')
     )
     filename = fd.askopenfilename(
         title='Open a file',

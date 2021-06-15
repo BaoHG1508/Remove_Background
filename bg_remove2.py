@@ -14,10 +14,7 @@ lower_green = np.array([42, 180, 39])
 green = np.array([77,255,255])
 mask = cv2.inRange(hsv,lower_green,green)
 mask_inv = cv2.bitwise_not(mask)
-mask = cv2.cvtColor(mask,cv2.COLOR_GRAY2RGB)
-mask = np.where(mask == 0,mask,back_ground)
-mask_inv = cv2.cvtColor(mask_inv,cv2.COLOR_GRAY2RGB)
-mask_inv = np.where(mask_inv == 0,mask_inv,frame)
+
 
 cv2.imshow("mask_inv", mask_inv)
 cv2.imshow("mask", mask)
